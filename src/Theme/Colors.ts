@@ -33,8 +33,8 @@ export const Colors = {
 export type IColors = typeof Colors;
 export type IColor = keyof IColors;
 
-export type ThemeColor = keyof IColor;
+export type ThemeColor = IColor;
 
-export const getAppColors = (): Record<ThemeColor, string> => {
-  return Colors as unknown as Record<ThemeColor, string>;
+export const getAppColors = (): Record<IColor, string> => {
+  return Colors as Record<IColor, string>;
 };

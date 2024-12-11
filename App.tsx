@@ -1,7 +1,8 @@
 import React from 'react';
+import { AppContainer } from './src/Navigation/AppContainer';
 
 const App = () => {
-  return null;
+  return <AppContainer />;
 };
 
 export default App;

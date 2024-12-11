@@ -9,7 +9,7 @@ export const RootNavigator = () => {
   return (
     <Stack.Navigator>
       {/* Main screens */}
-      <Stack.Group>
+      <Stack.Group screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Home" component={HomeScreen} />
       </Stack.Group>
     </Stack.Navigator>
