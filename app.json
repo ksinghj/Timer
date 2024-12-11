@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ksinghj.timer"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,11 +18,11 @@
         "backgroundColor": "#ffffff"
       }
     },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
+    // "web": {
+    //   "bundler": "metro",
+    //   "output": "static",
+    //   "favicon": "./assets/images/favicon.png"
+    // },
     "plugins": [
       [
         "expo-splash-screen",
