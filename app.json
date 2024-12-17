@@ -15,14 +15,9 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#000000"
       }
     },
-    // "web": {
-    //   "bundler": "metro",
-    //   "output": "static",
-    //   "favicon": "./assets/images/favicon.png"
-    // },
     "plugins": [
       [
         "expo-splash-screen",
