@@ -12,9 +12,11 @@ import { HorizontalSpacer, Spacer } from '@/src/Components/Spacer';
 import { useTimerStore } from '@/src/State/Timer';
 import { TimerControl } from '../TimerControl';
 import { IconSymbol } from '@/src/Components/UI/IconSymbol';
+import type { Timer } from '@/src/Types';
+import { guid } from '@/src/Utils';
 
 type Props = {
-  startTimer: () => void;
+  startTimer: (timer: Timer) => void;
 };
 
 export const CreateTimerSheet = forwardRef<BottomSheet, Props>(({ startTimer }, ref) => {
@@ -22,6 +24,21 @@ export const CreateTimerSheet = forwardRef<BottomSheet, Props>(({ startTimer }, 
   const appColors = getAppColors();
 
   const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} />, []);
+
+  const handleCreateTimer = useCallback(() => {
+    const newTimer: Timer = {
+      id: guid(),
+      value: {
+        hours: timer.hours,
+        minutes: timer.minutes,
+        seconds: timer.seconds,
+      },
+      label: timer.label,
+      paused: false,
+      startTime: Date.now(),
+    };
+    startTimer(newTimer);
+  }, [timer.hours, timer.minutes, timer.seconds, timer.label, startTimer]);
 
   return (
     <BottomSheetModalProvider>
@@ -78,7 +95,7 @@ export const CreateTimerSheet = forwardRef<BottomSheet, Props>(({ startTimer }, 
             <Container
               roundedFull
               backgroundColor="green20"
-              onPress={startTimer}
+              onPress={handleCreateTimer}
               alignSelf="center"
               center
               horizontal
