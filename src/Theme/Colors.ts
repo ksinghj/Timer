@@ -5,6 +5,12 @@ const BaseColors = {
   backgroundSecondary: '#0B0B0B',
   black: '#000000',
   white: '#FFFFFF',
+  contentPrimary: '#FFFFFF',
+  contentSecondary: '#606060',
+  fill: '#787880',
+  fillSecondary: '#191919',
+  buttonPrimaryDefault: '#009DFF',
+  buttonSecondaryDefault: '#EEEEEF',
 };
 
 type IBaseColors = typeof BaseColors;
