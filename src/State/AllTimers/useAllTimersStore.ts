@@ -26,10 +26,13 @@ export const useAllTimersStore = create(
           const timer = state.timers.get(id);
           if (timer) {
             if (timer.paused) {
+              // resume timer
+              timer.lastResumed = timer.lastPaused!; // has to have been set before to get here
               timer.paused = false;
-              timer.lastPausedAt = undefined;
+              timer.lastPaused = null;
             } else {
-              timer.lastPausedAt = Date.now();
+              // pause timer
+              timer.lastPaused = Date.now();
               timer.paused = true;
             }
           }
@@ -39,12 +42,15 @@ export const useAllTimersStore = create(
     {
       name: 'all-timers-store-1',
       storage: createJSONStorage(() => AsyncStorage, StorageOptions),
-      onRehydrateStorage: (state) => {
-        // Ensure the timers state is a Map after rehydration
-        if (state?.timers && !(state.timers instanceof Map)) {
-          state.timers = new Map(state.timers);
-        }
+      partialize({ timers }) {
+        return { timers };
       },
+      // onRehydrateStorage: (state) => {
+      //   // Ensure the timers state is a Map after rehydration
+      //   if (state?.timers && !(state.timers instanceof Map)) {
+      //     state.timers = new Map(state.timers);
+      //   }
+      // },
     }
   )
 );

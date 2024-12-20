@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Container } from '../Container';
 import type { Timer as ITimer } from '@/src/Types';
 import { Theme } from '@/src/Theme';
@@ -9,49 +9,73 @@ import { formatTimerValue } from '@/src/Utils';
 
 type Props = { timer: ITimer; togglePause: (timerId: string) => void };
 
+type Countdown = { hours: number; minutes: number; seconds: number };
+
 export const Timer: React.FC<Props> = ({ timer, togglePause }) => {
-  const { value, id, paused, startTime, lastPausedAt } = timer;
-  const { hours, minutes, seconds } = value;
-  const [countdown, setCountdown] = useState({ hours, minutes, seconds });
-  const { hours: newHours, minutes: newMinutes, seconds: newSeconds } = countdown;
+  const { id, paused, startTime, endTime, lastPaused, lastResumed } = timer;
+  const [countdown, setCountdown] = useState<Countdown | null>(null);
+  const { hours, minutes, seconds } = countdown || { hours: 0, minutes: 0, seconds: 0 };
+  const [countdownSet, setCountdownSet] = useState(false);
+
+  // get total time of timer regardless of pause, using startTime
+  const originalValues = useMemo(() => {
+    const diffInSeconds = Math.abs(endTime - startTime) / 1000;
+    return {
+      hours: Math.floor(diffInSeconds / 3600),
+      minutes: Math.floor((diffInSeconds % 3600) / 60),
+      seconds: Math.floor(diffInSeconds % 60),
+    };
+  }, [startTime]);
+
+  // Set initial countdown value
+  useEffect(() => {
+    const diffMillis = paused ? endTime - lastPaused! : endTime - lastResumed - (Date.now() - lastResumed);
+    const diffHours = Math.floor(diffMillis / 1000 / 60 / 60);
+    const diffMinutes = Math.floor((diffMillis / 1000 / 60) % 60);
+    const diffSeconds = Math.floor((diffMillis / 1000) % 60);
+
+    setCountdown({ hours: diffHours, minutes: diffMinutes, seconds: diffSeconds });
+    setCountdownSet(true);
+  }, [startTime]);
 
   useEffect(() => {
     let timerInterval: NodeJS.Timeout | null = null;
 
-    if (!paused) {
+    if (countdownSet && countdown && !paused) {
       timerInterval = setInterval(() => {
         setCountdown((prev) => {
-          let newSeconds = prev.seconds - 1;
-          let newMinutes = prev.minutes;
-          let newHours = prev.hours;
+          if (!prev) return { hours: 0, minutes: 0, seconds: 0 };
 
-          if (newSeconds < 0) {
-            newSeconds = 59;
-            newMinutes -= 1;
+          let { hours, minutes, seconds } = prev;
+
+          seconds -= 1;
+
+          if (seconds < 0) {
+            seconds = 59;
+            minutes -= 1;
           }
 
-          if (newMinutes < 0) {
-            newMinutes = 59;
-            newHours -= 1;
+          if (minutes < 0) {
+            minutes = 59;
+            hours -= 1;
           }
 
-          // Stop the timer when the countdown reaches 0
-          if (newHours === 0 && newMinutes === 0 && newSeconds === 0) {
+          if (hours <= 0 && minutes <= 0 && seconds <= 0) {
             clearInterval(timerInterval!);
+            return { hours: 0, minutes: 0, seconds: 0 };
           }
 
-          return { hours: newHours, minutes: newMinutes, seconds: newSeconds };
+          return { hours, minutes, seconds };
         });
       }, 1000);
-    } else if (paused) {
-      clearInterval(timerInterval!);
+    } else {
+      if (timerInterval) clearInterval(timerInterval);
     }
 
-    // Clean up the interval on component unmount or when paused
     return () => {
       if (timerInterval) clearInterval(timerInterval);
     };
-  }, [paused]);
+  }, [paused, countdownSet]);
 
   return (
     <Container paddingVertical={Theme.DefaultPadding} horizontal align="center" justify="space-between">
@@ -60,7 +84,7 @@ export const Timer: React.FC<Props> = ({ timer, togglePause }) => {
           {hours > 0 && (
             <>
               <AppText color="contentPrimary" size={34}>
-                {formatTimerValue(newHours)}
+                {formatTimerValue(hours)}
               </AppText>
               <AppText color="contentPrimary" size={34}>
                 :
@@ -68,18 +92,18 @@ export const Timer: React.FC<Props> = ({ timer, togglePause }) => {
             </>
           )}
           <AppText color="contentPrimary" size={34}>
-            {formatTimerValue(newMinutes)}
+            {formatTimerValue(minutes)}
           </AppText>
           <AppText color="contentPrimary" size={34}>
             :
           </AppText>
           <AppText color="contentPrimary" size={34}>
-            {formatTimerValue(newSeconds)}
+            {formatTimerValue(seconds)}
           </AppText>
         </Container>
         <Spacer size={2} />
         <AppText color="contentSecondary" size={15}>
-          {timer.label} - {hours}h {minutes}m {seconds}s
+          {timer.label} - {originalValues.hours}h {originalValues.minutes}m {originalValues.seconds}s
         </AppText>
       </Container>
       <Container hitSlop={15} onPress={() => togglePause(id)}>

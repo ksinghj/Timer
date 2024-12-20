@@ -1,18 +1,24 @@
 import React, { useCallback } from 'react';
 import { FlatList } from 'react-native';
-import { useShallow } from 'zustand/shallow';
+import { useShallow } from 'zustand/react/shallow';
 import { Timer } from '@/src/Components/Timer';
 import { Spacer } from '@/src/Components/Spacer';
 import { useAllTimersStore } from '@/src/State/AllTimers';
 import type { Timer as ITimer } from '@/src/Types';
 
 export const TimersList: React.FC = () => {
-  const { timers, toggleTimerPaused } = useAllTimersStore(
+  const { timers, toggleTimerPaused, removeTimer } = useAllTimersStore(
     useShallow((state) => ({
       timers: state.timers,
       toggleTimerPaused: state.toggleTimerPaused,
+      removeTimer: state.removeTimer,
     }))
   );
+
+  // DEV quick reset
+  // timers.forEach((timer) => {
+  //   removeTimer(timer.id);
+  // });
 
   const renderItem = useCallback(
     ({ item }: { item: ITimer }) => {

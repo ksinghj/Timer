@@ -26,16 +26,17 @@ export const CreateTimerSheet = forwardRef<BottomSheet, Props>(({ startTimer }, 
   const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} />, []);
 
   const handleCreateTimer = useCallback(() => {
+    const now = Date.now();
+    const calculatedEndTime = now + timer.hours * 3600000 + timer.minutes * 60000 + timer.seconds * 1000;
+
     const newTimer: Timer = {
       id: guid(),
-      value: {
-        hours: timer.hours,
-        minutes: timer.minutes,
-        seconds: timer.seconds,
-      },
       label: timer.label,
       paused: false,
-      startTime: Date.now(),
+      startTime: now,
+      endTime: calculatedEndTime,
+      lastPaused: null,
+      lastResumed: now,
     };
     startTimer(newTimer);
   }, [timer.hours, timer.minutes, timer.seconds, timer.label, startTimer]);
