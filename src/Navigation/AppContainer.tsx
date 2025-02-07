@@ -3,8 +3,8 @@ import { StatusBar, StyleSheet } from 'react-native';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { RootNavigator } from './RootNavigator';
 import { NavigationContainer } from '@react-navigation/native';
+import { RootNavigator } from './RootNavigator';
 
 /**
  * Main app container, which wraps the entire app in a navigation container

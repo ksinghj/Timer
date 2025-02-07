@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Container } from '../Container';
 import type { Timer as ITimer } from '@/src/Types';
 import { Theme } from '@/src/Theme';
@@ -9,58 +9,90 @@ import { formatTimerValue } from '@/src/Utils';
 
 type Props = { timer: ITimer; togglePause: (timerId: string) => void };
 
+type Countdown = { hours: number; minutes: number; seconds: number; milliseconds: number };
+
 export const Timer: React.FC<Props> = ({ timer, togglePause }) => {
-  const { value, id, paused, startTime, lastPausedAt } = timer;
-  const { hours, minutes, seconds } = value;
-  const [countdown, setCountdown] = useState({ hours, minutes, seconds });
-  const { hours: newHours, minutes: newMinutes, seconds: newSeconds } = countdown;
+  const { id, paused, startTime, duration, lastPaused } = timer;
+  const [countdown, setCountdown] = useState<Countdown | null>(null);
+  const { hours, minutes, seconds } = countdown || {
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  };
+
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    let timerInterval: NodeJS.Timeout | null = null;
+    const interval = setInterval(() => {
+      setTick((tick) => tick + 1);
+    }, 1000);
 
-    if (!paused) {
-      timerInterval = setInterval(() => {
-        setCountdown((prev) => {
-          let newSeconds = prev.seconds - 1;
-          let newMinutes = prev.minutes;
-          let newHours = prev.hours;
+    return () => clearInterval(interval);
+  }, []);
 
-          if (newSeconds < 0) {
-            newSeconds = 59;
-            newMinutes -= 1;
-          }
+  // set initial countdown
+  useEffect(() => {
+    const now = Date.now();
+    const elapsed = (lastPaused || now) - startTime;
+    const remaining = duration * 1000 - elapsed;
 
-          if (newMinutes < 0) {
-            newMinutes = 59;
-            newHours -= 1;
-          }
+    setCountdown({
+      hours: Math.floor(remaining / 3600000),
+      minutes: Math.floor((remaining % 3600000) / 60000),
+      seconds: Math.floor((remaining % 60000) / 1000),
+      milliseconds: remaining % 1000,
+    });
+  }, []);
 
-          // Stop the timer when the countdown reaches 0
-          if (newHours === 0 && newMinutes === 0 && newSeconds === 0) {
-            clearInterval(timerInterval!);
-          }
+  const updateCountdown = useCallback(() => {
+    const now = Date.now();
+    const elapsed = now - startTime;
+    const remainingDuration = duration * 1000 - elapsed;
 
-          return { hours: newHours, minutes: newMinutes, seconds: newSeconds };
-        });
-      }, 1000);
-    } else if (paused) {
-      clearInterval(timerInterval!);
+    setCountdown({
+      hours: Math.floor(remainingDuration / 3600000),
+      minutes: Math.floor((remainingDuration % 3600000) / 60000),
+      seconds: Math.floor((remainingDuration % 60000) / 1000),
+      milliseconds: remainingDuration % 1000,
+    });
+  }, [startTime, duration]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!paused) {
+        updateCountdown();
+      }
+    }, 100);
+
+    if (paused) {
+      clearInterval(interval);
     }
 
-    // Clean up the interval on component unmount or when paused
-    return () => {
-      if (timerInterval) clearInterval(timerInterval);
+    return () => clearInterval(interval);
+  }, [paused, startTime, duration]);
+
+  // get total time of timer regardless of pause, using startTime
+  const originalValues = useMemo(() => {
+    return {
+      hours: Math.floor(duration / 3600),
+      minutes: Math.floor((duration % 3600) / 60),
+      seconds: Math.floor(duration % 60),
     };
-  }, [paused]);
+  }, [duration]);
 
   return (
-    <Container paddingVertical={Theme.DefaultPadding} horizontal align="center" justify="space-between">
+    <Container
+      paddingVertical={Theme.DefaultPadding}
+      horizontal
+      align="center"
+      justify="space-between"
+    >
       <Container>
         <Container horizontal align="center">
           {hours > 0 && (
             <>
               <AppText color="contentPrimary" size={34}>
-                {formatTimerValue(newHours)}
+                {formatTimerValue(hours)}
               </AppText>
               <AppText color="contentPrimary" size={34}>
                 :
@@ -68,18 +100,19 @@ export const Timer: React.FC<Props> = ({ timer, togglePause }) => {
             </>
           )}
           <AppText color="contentPrimary" size={34}>
-            {formatTimerValue(newMinutes)}
+            {formatTimerValue(minutes)}
           </AppText>
           <AppText color="contentPrimary" size={34}>
             :
           </AppText>
           <AppText color="contentPrimary" size={34}>
-            {formatTimerValue(newSeconds)}
+            {formatTimerValue(seconds)}
           </AppText>
         </Container>
         <Spacer size={2} />
         <AppText color="contentSecondary" size={15}>
-          {timer.label} - {hours}h {minutes}m {seconds}s
+          {timer.label} - {originalValues.hours}h {originalValues.minutes}m {originalValues.seconds}
+          s
         </AppText>
       </Container>
       <Container hitSlop={15} onPress={() => togglePause(id)}>
