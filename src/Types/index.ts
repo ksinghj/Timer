@@ -4,7 +4,6 @@ export type Timer = {
   label: string;
   paused: boolean;
   startTime: number;
-  endTime: number;
+  duration: number; // duration in seconds
   lastPaused: number | null; // timestamp
-  lastResumed: number; // timestamp, initial value is startTime
 };

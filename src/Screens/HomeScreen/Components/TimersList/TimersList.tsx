@@ -16,9 +16,11 @@ export const TimersList: React.FC = () => {
   );
 
   // DEV quick reset
-  // timers.forEach((timer) => {
-  //   removeTimer(timer.id);
-  // });
+  // if (__DEV__) {
+  //   timers.forEach((timer) => {
+  //     removeTimer(timer.id);
+  //   });
+  // }
 
   const renderItem = useCallback(
     ({ item }: { item: ITimer }) => {

@@ -23,21 +23,25 @@ export const CreateTimerSheet = forwardRef<BottomSheet, Props>(({ startTimer }, 
   const { timer, setTimerValue } = useTimerStore();
   const appColors = getAppColors();
 
-  const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} />, []);
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} />,
+    []
+  );
 
   const handleCreateTimer = useCallback(() => {
     const now = Date.now();
-    const calculatedEndTime = now + timer.hours * 3600000 + timer.minutes * 60000 + timer.seconds * 1000;
+    // duration in seconds
+    const duration = timer.hours * 3600 + timer.minutes * 60 + timer.seconds;
 
     const newTimer: Timer = {
       id: guid(),
       label: timer.label,
       paused: false,
       startTime: now,
-      endTime: calculatedEndTime,
+      duration,
       lastPaused: null,
-      lastResumed: now,
     };
+
     startTimer(newTimer);
   }, [timer.hours, timer.minutes, timer.seconds, timer.label, startTimer]);
 
@@ -49,7 +53,8 @@ export const CreateTimerSheet = forwardRef<BottomSheet, Props>(({ startTimer }, 
         enablePanDownToClose
         index={-1}
         snapPoints={['95%']}
-        backgroundStyle={{ backgroundColor: appColors.backgroundSecondary }}>
+        backgroundStyle={{ backgroundColor: appColors.backgroundSecondary }}
+      >
         <BottomSheetView>
           <Container paddingHorizontal={Theme.DefaultPadding}>
             <Container paddingHorizontal={2}>
@@ -62,19 +67,31 @@ export const CreateTimerSheet = forwardRef<BottomSheet, Props>(({ startTimer }, 
               <AppText color="contentPrimary">Hours</AppText>
             </Container>
             <Spacer size={2} />
-            <TimerControl increment={1} value={timer.hours} setValue={(val) => setTimerValue('hours', val)} />
+            <TimerControl
+              increment={1}
+              value={timer.hours}
+              setValue={(val) => setTimerValue('hours', val)}
+            />
             <Spacer />
             <Container paddingHorizontal={2}>
               <AppText color="contentPrimary">Minutes</AppText>
             </Container>
             <Spacer size={2} />
-            <TimerControl increment={1} value={timer.minutes} setValue={(val) => setTimerValue('minutes', val)} />
+            <TimerControl
+              increment={1}
+              value={timer.minutes}
+              setValue={(val) => setTimerValue('minutes', val)}
+            />
             <Spacer />
             <Container paddingHorizontal={2}>
               <AppText color="contentPrimary">Seconds</AppText>
             </Container>
             <Spacer size={2} />
-            <TimerControl increment={10} value={timer.seconds} setValue={(val) => setTimerValue('seconds', val)} />
+            <TimerControl
+              increment={10}
+              value={timer.seconds}
+              setValue={(val) => setTimerValue('seconds', val)}
+            />
             <Spacer size={8} />
             <Container
               horizontal
@@ -82,7 +99,8 @@ export const CreateTimerSheet = forwardRef<BottomSheet, Props>(({ startTimer }, 
               justify="space-between"
               align="center"
               padding={Theme.DefaultPadding}
-              backgroundColor="fillSecondary">
+              backgroundColor="fillSecondary"
+            >
               <AppText color="contentPrimary">Label</AppText>
               <Container horizontal center>
                 <AppText weight="medium" color="contentSecondary">
@@ -102,7 +120,8 @@ export const CreateTimerSheet = forwardRef<BottomSheet, Props>(({ startTimer }, 
               horizontal
               padding={2}
               width={75}
-              height={75}>
+              height={75}
+            >
               <AppText color="green">Start</AppText>
             </Container>
           </Container>
