@@ -65,7 +65,7 @@ extension WidgetAttributes.ContentState {
      }
 }
 
-#Preview("Notification", as: .content, using: WidgetAttributes.preview) {
+#Preview("Live Activity", as: .content, using: WidgetAttributes.preview) {
    WidgetLiveActivity()
 } contentStates: {
     WidgetAttributes.ContentState.smiley
