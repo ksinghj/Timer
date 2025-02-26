@@ -11,6 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ksinghj.timer",
+      "appleTeamId": "8G7K79F7Y3",
       "entitlements": {
         "com.apple.security.application-groups": ["group.com.ksinghj.timer"]
       }
