@@ -1,5 +1,6 @@
 import BottomSheet from '@gorhom/bottom-sheet';
 import React from 'react';
+import * as LiveActivities from '@local:live-activities';
 import { Container } from '@/src/Components/Container';
 import { AppScreen } from '@/src/Components/Screen';
 import { AppText } from '@/src/Components/Text';
@@ -10,6 +11,7 @@ import { useAllTimersStore } from '@/src/State/AllTimers';
 import type { Timer } from '@/src/Types';
 import { TimersList } from './Components/TimersList';
 import { Spacer } from '@/src/Components/Spacer';
+import { getTimerLiveActivityData } from '@/src/Utils';
 
 export const HomeScreen: React.FC = () => {
   const appColors = getAppColors();
@@ -22,6 +24,13 @@ export const HomeScreen: React.FC = () => {
 
   const handleStartTimer = (timer: Timer) => {
     addTimer(timer);
+
+    // Start live activity with raw timer data
+    if (LiveActivities.areActivitiesEnabled()) {
+      const liveActivityData = getTimerLiveActivityData(timer);
+      LiveActivities.startActivity(timer.id, liveActivityData);
+    }
+
     createTimerSheetRef.current?.close();
   };
 
@@ -37,8 +46,8 @@ export const HomeScreen: React.FC = () => {
           </Container>
         </Container>
         <Spacer />
-        <TimersList />
       </Container>
+      <TimersList />
       <CreateTimerSheet ref={createTimerSheetRef} startTimer={handleStartTimer} />
     </AppScreen>
   );

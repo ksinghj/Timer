@@ -34,7 +34,19 @@
         }
       ],
       "expo-font",
-      "@bacons/apple-targets"
+      "@bacons/apple-targets",
+      [
+        "./modules/live-activities/app.plugin.js",
+        {
+          "frequentUpdates": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "enableBackgroundRemoteNotifications": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

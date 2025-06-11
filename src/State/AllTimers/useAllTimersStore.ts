@@ -3,6 +3,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Timer } from '@/src/Types';
 import { StorageOptions } from '@/src/Utils';
+import { getTimerLiveActivityData } from '@/src/Utils';
+import * as LiveActivities from '@local:live-activities';
 
 type AllTimersStore = {
   timers: Map<string, Timer>;
@@ -13,7 +15,7 @@ type AllTimersStore = {
 
 export const useAllTimersStore = create(
   persist<AllTimersStore>(
-    (set) => ({
+    (set, get) => ({
       timers: new Map<string, Timer>(),
       addTimer: (timer) =>
         set((state) => ({
@@ -27,20 +29,30 @@ export const useAllTimersStore = create(
       toggleTimerPaused: (id) =>
         set((state) => {
           const timer = state.timers.get(id);
-          if (timer) {
-            if (timer.paused) {
-              // Calculate the paused duration
-              const pausedDuration = Date.now() - (timer.lastPaused || 0);
-              // Adjust the startTime by adding the paused duration
-              timer.startTime += pausedDuration;
-              timer.paused = false;
-              timer.lastPaused = null;
-            } else {
-              // Pause the timer
-              timer.lastPaused = Date.now();
-              timer.paused = true;
+          if (!timer) return state;
+
+          if (timer.paused) {
+            // Resume timer: Calculate the paused duration and adjust startTime
+            const pausedDuration = Date.now() - (timer.lastPaused || 0);
+            timer.startTime += pausedDuration;
+            timer.paused = false;
+            timer.lastPaused = null;
+          } else {
+            // Pause timer
+            timer.lastPaused = Date.now();
+            timer.paused = true;
+          }
+
+          // Update LiveActivity with new timer state
+          if (LiveActivities.areActivitiesEnabled()) {
+            try {
+              const liveActivityData = getTimerLiveActivityData(timer);
+              LiveActivities.updateActivity(timer.id, liveActivityData);
+            } catch (error) {
+              console.warn('Failed to update LiveActivity:', error);
             }
           }
+
           return { timers: new Map(state.timers) };
         }),
     }),
@@ -51,12 +63,6 @@ export const useAllTimersStore = create(
       partialize({ timers }) {
         return { timers };
       },
-      // onRehydrateStorage: (state) => {
-      //   // Ensure the timers state is a Map after rehydration
-      //   if (state?.timers && !(state.timers instanceof Map)) {
-      //     state.timers = new Map(state.timers);
-      //   }
-      // },
     }
   )
 );
