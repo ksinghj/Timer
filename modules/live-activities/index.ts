@@ -1,10 +1,6 @@
 import { CodedError, EventSubscription } from 'expo-modules-core';
 import { useEffect } from 'react';
-import type {
-  LiveActivityFn,
-  LiveActivityState,
-  onPushTokenChangePayload,
-} from './src/LiveActivities.types';
+import type { LiveActivityFn, onPushTokenChangePayload } from './src/LiveActivities.types';
 import LiveActivitiesModule from './src/LiveActivitiesModule';
 
 // left comments in with credits to @mrevanzak for the original module, modified for this use case
